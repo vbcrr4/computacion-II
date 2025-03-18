@@ -1,0 +1,160 @@
+clase1_18-03
+##getopt y argparse en Python
+1. Activación de conocimientos previos
+
+Antes de explicarte getopt y argparse, quiero saber qué tan familiarizado estás con los argumentos de línea de comandos y el uso de la terminal.
+Preguntas iniciales:
+
+    ¿Has ejecutado alguna vez un script de Python desde la terminal pasando argumentos?
+        Ejemplo: python script.py argumento1 argumento2
+    ¿Qué crees que sucede cuando pasas argumentos a un script de Python? ¿Cómo crees que el script los procesa?
+    ¿Sabes qué es sys.argv y cómo se usa en Python?
+
+2. Explicación teórica: getopt vs argparse
+
+Ahora que tienes clara la base, te explico cada uno de estos módulos y por qué usarlos.
+
+📌 getopt
+
+    Es un módulo más bajo nivel y parecido al manejo de argumentos en C.
+    Útil para scripts pequeños y sencillos.
+    Permite definir opciones cortas (-h) y largas (--help), pero requiere más código para validar argumentos.
+
+📌 argparse
+
+    Es la forma moderna y recomendada en Python.
+    Maneja argumentos de manera más robusta.
+    Permite definir argumentos obligatorios, tipos de datos, valores por defecto, y mensajes de ayuda automáticos.
+    Es más legible y fácil de mantener que getopt.
+
+🚀 Diferencia clave:
+
+    getopt requiere más trabajo manual para validar y manejar los argumentos.
+    argparse hace mucho de esto automáticamente y es más flexible.
+
+3. Demostración práctica: getopt
+
+Empecemos con un ejemplo sencillo de getopt.
+
+📌 Objetivo: Crear un script que acepte una opción -n o --name y muestre un saludo.
+📜 Código con getopt:
+"""
+import getopt
+import sys
+
+def main():
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "n:", ["name="]) #getopt.getopt() analiza los argumentos pasados y los convierte en una lista estructurada de opciones (opts) y argumentos adicionales (args).
+    except getopt.GetoptError as err:
+        print("Error:", err)
+        sys.exit(1)
+    
+    name = "desconocido"  # Valor por defecto
+    for opt, arg in opts:
+        if opt in ("-n", "--name"):
+            name = arg
+    
+    print(f"¡Hola, {name}!")
+
+if __name__ == "__main__":
+    main()
+"""
+📌 Ejecutar en terminal:
+python script.py -n Juan
+# 👉 Salida esperada: ¡Hola, Juan!
+
+4. Demostración práctica: argparse
+
+Ahora pasemos a argparse, que es más moderno y recomendado.
+
+📌 Objetivo: Hacer lo mismo que antes, pero con argparse.
+
+📜 Código con argparse:
+"""
+import argparse
+
+def main():
+    parser = argparse.ArgumentParser(description="Ejemplo de argparse")
+    parser.add_argument("-n", "--name", type=str, default="desconocido", help="Nombre del usuario")
+    args = parser.parse_args()
+
+    print(f"¡Hola, {args.name}!")
+
+if __name__ == "__main__":
+    main()
+"""
+📌 Ejecutar en terminal:
+python script.py -n Juan
+# 👉 Salida esperada: ¡Hola, Juan!
+
+🚀 Diferencias clave respecto a getopt:
+
+    argparse define los argumentos de manera más declarativa (parser.add_argument(...)).
+    Se generan automáticamente mensajes de ayuda (-h o --help).
+    No es necesario procesar manualmente los argumentos con for.
+
+💡 Desafío práctico
+
+📌 Objetivo: Crear un script que acepte dos argumentos:
+
+    -n o --name: Nombre del usuario (string).
+    -a o --age: Edad del usuario (entero).
+
+👉 Si el usuario no proporciona -n, el nombre será "desconocido".
+👉 Si el usuario no proporciona -a, se debe mostrar un mensaje indicando que no se especificó edad.
+
+📜 Ejemplo de uso:
+python script.py -n Juan -a 25
+💡 Salida esperada:
+¡Hola, Juan! Tienes 25 años.
+Si falta -a:
+¡Hola, Juan! No especificaste tu edad.
+🚀 Instrucciones:
+
+    Escribe el código basado en argparse.
+    Prueba el script en la terminal.
+    Respóndeme con el código y los resultados obtenidos.
+Ejercicio:
+"""
+import argparse
+
+def main():
+    # Crear el parser
+    parser = argparse.ArgumentParser(description="Saludo al usuario.")
+    
+    # Agregar argumentos
+    parser.add_argument('-n', '--name', type=str, default='desconocido', help='Nombre del usuario')
+    parser.add_argument('-a', '--age', type=int, help='Edad del usuario')
+    
+    # Parsear los argumentos
+    args = parser.parse_args()
+    
+    # Generar la salida según los argumentos proporcionados
+    if args.age is not None:
+        print(f"¡Hola, {args.name}! Tienes {args.age} años.")
+    else:
+        print(f"¡Hola, {args.name}! No especificaste tu edad.")
+
+if __name__ == "__main__":
+    main()
+"""    
+🎯 Cierre y recursos adicionales
+
+✅ Has aprendido:
+
+    La diferencia entre getopt y argparse.
+    Cómo definir y manejar argumentos de línea de comandos.
+    Cómo hacer argumentos opcionales y obligatorios.
+    Cómo mejorar la usabilidad de un script con argparse.
+
+🚀 Siguientes pasos:
+Si quieres seguir practicando, intenta:
+
+    Agregar un argumento booleano (-v o --verbose) para imprimir información adicional si el usuario lo indica.
+    Permitir múltiples valores en un argumento (--hobbies, por ejemplo).
+    Usar choices= para restringir valores posibles de un argumento.
+
+🔗 Para profundizar:
+
+    📄 Documentación oficial de argparse (https://docs.python.org/3/library/argparse.html)
+    📖 Guía detallada con ejemplos ()
