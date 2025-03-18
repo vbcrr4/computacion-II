@@ -1,0 +1,171 @@
+clase 18/03
+1. Configuración de Git
+¿Qué es Git y por qué es importante?
+
+Git es un sistema de control de versiones distribuido que permite rastrear cambios en archivos, coordinar el trabajo entre desarrolladores y mantener un historial del desarrollo de un proyecto.
+
+Antes de Git, los sistemas de control de versiones tradicionales (como SVN o CVS) tenían estas limitaciones:
+
+    Se basaban en un modelo centralizado, lo que significaba que si el servidor fallaba, se podía perder el historial.
+    No permitían trabajar offline, ya que requerían conexión constante al servidor.
+    La fusión de cambios de varios desarrolladores podía ser complicada y propensa a errores.
+
+Git resuelve estos problemas al:
+
+    Permitir que cada desarrollador tenga una copia completa del historial del proyecto en su máquina.
+    Ofrecer herramientas avanzadas para fusionar cambios de manera eficiente.
+    Facilitar la creación de diferentes versiones de un proyecto (ramas).
+
+Git es una habilidad esencial para los ingenieros de software porque:
+
+    Se usa en casi todos los proyectos modernos.
+    Facilita la colaboración en equipos.
+    Permite gestionar cambios y versiones sin perder información.
+Instalación y configuración básica
+
+    Ahora vamos a asegurarnos de que Git está instalado en tu sistema y configurarlo con tu identidad.
+    Verificar si Git está instalado
+    Abre una terminal y ejecuta: git --version
+    Si Git está instalado, verás algo como git version 2.x.x.
+    Si no está instalado, dime tu sistema operativo para guiarte en la instalación.
+
+    Configurar tu identidad
+    Esto es importante porque cada cambio que hagas en Git tendrá tu nombre y correo electrónico. Ejecuta:
+    git config --global user.name "Tu Nombre"
+    git config --global user.email "tu@email.com"
+
+    Verificar la configuración
+    Para asegurarte de que se guardaron correctamente, ejecuta:
+    git config --list
+
+2. Creación de un repositorio
+¿Qué es un repositorio Git?
+
+Un repositorio Git es un directorio donde Git almacena el historial de cambios de un proyecto. Puede ser:
+
+    Local: Un repositorio en tu propia máquina.
+    Remoto: Un repositorio en un servidor como GitHub o GitLab, que permite colaboración en equipo.
+
+Cuando inicializas un repositorio en un directorio, Git crea una carpeta oculta llamada .git que contiene toda la información sobre el historial de cambios.
+
+Comandos para crear un repositorio
+Crear un directorio para el curso
+    mkdir computacion-II
+    cd computacion-II
+
+    Crear un repositorio local
+    git init
+
+    Verificar el estado del repositorio
+    git status
+3. Estructura del repositorio del curso
+¿Por qué es importante una estructura organizada en proyectos de software?
+
+Mantener una estructura clara en un proyecto es fundamental porque:
+
+    Facilita la navegación y mantenimiento del código.
+    Ayuda a que otros desarrolladores (y tú mismo en el futuro) entiendan mejor el proyecto.
+    Permite separar distintos tipos de archivos (código, documentación, apuntes, etc.).
+
+En este caso, vamos a seguir una estructura que nos ayudará a organizar las clases y trabajos prácticos.
+Creando la estructura de directorios
+
+Ejecuta los siguientes comandos en la terminal para crear la estructura:
+    mkdir -p TP_1 TP_2 Clases/Clase_1/{Apuntes,Ejercicios,Resumen_pedagógico} TRABAJO_FINAL
+    touch README.md
+mkdir -p crea directorios y subdirectorios de forma recursiva.
+touch README.md crea un archivo vacío llamado README.md.
+    Creando el README.md
+
+    El archivo README.md es importante porque:
+
+    Es la primera referencia para quienes acceden al repositorio.
+    Documenta información esencial sobre el proyecto.
+Ábrelo en un editor de texto y añade la siguiente información:
+# Computación II - Repositorio de Curso
+
+## Información Personal
+- **Nombre:** [Tu Nombre]
+- **Expectativas sobre la materia:** [Escribe aquí]
+- **Intereses en programación:** [Escribe aquí]
+- **Hobbies:** [Escribe aquí]
+
+## Estructura del Repositorio
+- `TP_1/` y `TP_2/`: Trabajos prácticos.
+- `Clases/`: Material de clases.
+  - `Clase_1/`: Apuntes, ejercicios y resumen pedagógico.
+- `TRABAJO_FINAL/`: Proyecto final de la materia.
+
+4. Primer commit y flujo de trabajo en Git
+Conceptos clave
+
+Git maneja los archivos en tres áreas:
+
+    Working Directory (Directorio de trabajo): Donde editas los archivos en tu computadora.
+    Staging Area (Área de preparación): Una zona intermedia donde decides qué cambios se incluirán en el próximo commit.
+    Repository (Repositorio): El historial de cambios guardados en Git con cada commit.
+
+El flujo de trabajo básico en Git es:
+
+    Modificar archivos → (Working Directory)
+    Añadirlos al área de preparación → git add (Staging Area)
+    Confirmar los cambios en el historial → git commit (Repository)
+    Enviar los cambios al remoto (GitHub) → git push
+Ejecutando el flujo de trabajo en Git
+
+Ejecuta estos comandos dentro de tu repositorio:
+
+    Verifica el estado del repositorio: git status
+    Añadir todos los archivos al área de staging: git add .
+    Confirmar los cambios: git commit -m "Commit message"
+    Enviar los cambios al repositorio: git push
+5. Conexión con repositorio remoto
+Trabajo distribuido en Git
+
+Git permite un modelo de trabajo distribuido, donde cada desarrollador tiene una copia completa del repositorio. Esto significa que no solo trabajas en tu máquina local, sino que puedes sincronizarte con otros a través de un repositorio remoto (por ejemplo, en GitHub, GitLab, etc.).
+¿Qué es un repositorio remoto?
+
+Un repositorio remoto es una versión del repositorio que reside en un servidor (como GitHub), accesible desde cualquier lugar. Su principal función es compartir cambios entre los miembros de un equipo de desarrollo y mantener copias de seguridad de tu código.
+Pasos para conectar tu repositorio local con GitHub
+
+1.Crear un repositorio en GitHub
+Si no lo has hecho aún, crea un repositorio vacío en GitHub como te expliqué antes (asegúrate de no marcar la opción de crear un README.md).
+
+2.Vincular tu repositorio local con GitHub
+En tu terminal, en el repositorio local, ejecuta: git remote add origin https://github.com/TU_USUARIO/Computacion-II.git
+
+Subir tus archivos al repositorio remoto
+Ahora, sube tu repositorio local al remoto usando: git push -u origin master
+
+Verificar en GitHub
+
+6. Conceptos básicos de terminal Unix
+Introducción a la entrada/salida en Unix
+
+Unix/Linux es conocido por su enfoque en la entrada/salida (E/S) mediante la terminal, lo que permite la automatización y composición de tareas de forma eficiente.
+Entrada y salida estándar
+
+    stdin (entrada estándar): Lo que el usuario ingresa (teclado).
+    stdout (salida estándar): Lo que el sistema muestra en la pantalla.
+    stderr (error estándar): Mensajes de error mostrados en la terminal.
+
+Redirección de entrada y salida
+
+Puedes redirigir la entrada y salida estándar usando operadores. Algunos de los más comunes son:
+
+    >: Redirige la salida a un archivo, reemplazando su contenido.
+    echo "Hola Mundo" > saludo.txt (Esto crea o sobrescribe el archivo saludo.txt con el texto "Hola Mundo").
+    >>: Redirige la salida a un archivo, añadiendo al final del archivo sin sobrescribirlo.
+    echo "Nuevo saludo" >> saludo.txt 
+    <: Redirige la entrada desde un archivo (en vez de usar el teclado).
+    sort < archivo.txt
+    2>: Redirige los errores a un archivo.
+    ls non_existent_file 2> errores.txt
+Pipes (|)
+
+Los pipes permiten conectar el resultado de un comando a la entrada de otro. Ejemplo:
+ls | grep ".txt"
+Esto lista todos los archivos en el directorio y filtra solo aquellos que terminan en .txt.
+Archivos especiales en Linux
+    /dev/null: El "agujero negro" de Linux. Cualquier salida dirigida allí se pierde.
+Ejemplo: ls > /dev/null
