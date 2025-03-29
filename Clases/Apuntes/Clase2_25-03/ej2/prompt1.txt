@@ -1,0 +1,388 @@
+1. Fundamentos de procesos
+
+Empecemos con lo esencial: ¿qué es un proceso en un sistema operativo?
+Definición formal de proceso
+
+Un proceso es una instancia en ejecución de un programa. Mientras que un programa es un conjunto de instrucciones almacenadas en un archivo ejecutable, un proceso es ese programa cargado en memoria y en ejecución, gestionado por el sistema operativo.
+
+Cada proceso tiene varios atributos importantes:
+
+    PID (Process ID): Un identificador único asignado por el sistema.
+
+    PPID (Parent Process ID): Identificador del proceso padre.
+
+    Estado: Puede estar en ejecución, esperando, suspendido o finalizado.
+
+    Espacio de memoria: Incluye código, datos y pila de ejecución.
+
+    Recursos asignados: Como archivos abiertos y uso de CPU.
+
+Diferencias entre programa y proceso
+Característica	Programa	Proceso
+Estado	Archivo en disco	Entidad en ejecución en RAM
+Identificador	No tiene	PID asignado por el SO
+Recursos	No usa recursos	Consume CPU, memoria, archivos abiertos
+Multiplicidad	Un único archivo	Puede haber múltiples procesos ejecutando el mismo programa
+
+Ejemplo: Si ejecutas python script.py tres veces, tendrás tres procesos del mismo programa.
+Historia y evolución del concepto de procesos
+
+Los primeros sistemas operativos no tenían multitarea: ejecutaban un solo programa a la vez. Con el tiempo, surgieron los sistemas multiprogramados, permitiendo múltiples procesos en ejecución simultánea, optimizando el uso del procesador y la memoria.
+
+Hoy en día, los sistemas operativos modernos usan planificación de procesos y técnicas como context switching para gestionar la ejecución de múltiples procesos eficientemente.
+📌 Alto para puesta en común
+
+Antes de seguir, verifica que has entendido los conceptos básicos.
+Preguntas de comprensión:
+
+    ¿Cuál es la diferencia principal entre un programa y un proceso?
+    1.Un programa es un conjunto de instrucciones almacenadas en un archivo, mientras que un proceso es una instancia en ejecución de un programa, con recursos asignados como memoria y CPU.
+    ¿Qué es un PID y por qué es importante?
+    2.El PID (Process ID) es un número único que identifica a cada proceso en el sistema. Es importante porque permite gestionar y controlar los procesos en ejecución.
+    ¿Qué sucede si ejecutamos el mismo programa varias veces?
+    3.Cada ejecución genera un proceso distinto con su propio PID, pudiendo ejecutarse de manera independiente o compartir ciertos recursos según el sistema operativo.
+2. El modelo de procesos en UNIX/Linux
+
+En los sistemas UNIX/Linux, los procesos siguen una jerarquía bien definida. Veamos cómo funciona.
+Jerarquía de procesos y herencia
+
+Cada proceso en UNIX tiene un proceso padre (PPID) y puede generar procesos hijos.
+Esta estructura forma un árbol de procesos, donde:
+
+    El primer proceso en el sistema (PID = 1) es init o systemd, que genera otros procesos.
+
+    Los procesos hijos pueden crear más procesos, formando una jerarquía.
+
+Puedes visualizar esto con:
+
+pstree -p
+
+Ejemplo de jerarquía:
+
+systemd(1)─┬─sshd(1000)───bash(2000)───python3(3000)
+           ├─cron(1010)
+           ├─nginx(1020)─┬─nginx(1021)
+           │             └─nginx(1022)
+
+Aquí systemd es el padre de todos, bash inició un proceso python3, y nginx creó múltiples procesos hijos.
+El proceso init / systemd
+
+El primer proceso que se ejecuta en UNIX/Linux es:
+
+    init (en sistemas antiguos)
+
+    systemd (en sistemas modernos como Ubuntu, Fedora, Arch, etc.)
+
+Este proceso es responsable de:
+
+    Iniciar otros procesos esenciales.
+
+    Administrar servicios del sistema.
+
+    Adoptar procesos huérfanos (explicaremos esto después).
+
+Para ver el proceso systemd:
+
+ps -fp 1
+
+Visualización de procesos con herramientas del sistema
+
+Ejercicios prácticos:
+
+    Listar los procesos activos:
+
+ps -e
+
+Ver los procesos de un usuario específico (ejemplo: "juan"):
+
+ps -u juan
+
+Mostrar la jerarquía completa de procesos:
+
+pstree -p
+
+Filtrar por un proceso específico (ejemplo: bash):
+
+    ps aux | grep bash
+
+📌 Alto para puesta en común
+
+Prueba estos comandos y verifica que puedas ver los procesos en tu sistema.
+Preguntas de comprensión:
+
+    ¿Cómo se organizan los procesos en UNIX/Linux?
+
+    ¿Cuál es la función del proceso init o systemd?
+
+    ¿Qué comando puedes usar para ver la jerarquía de procesos en ejecución?
+    1.Los procesos se organizan en una estructura jerárquica, donde cada proceso tiene un padre y puede tener hijos. Esta relación se maneja a través de PIDs y PPIDs (Parent Process ID).
+    2.Son los primeros procesos que se ejecutan al arrancar el sistema y se encargan de iniciar, gestionar y supervisar otros procesos esenciales.
+    3.Se puede usar pstree para visualizar los procesos en forma de árbol y entender su relación entre ellos.
+3. Manipulación de procesos con Python
+
+Ahora aprenderemos a crear y gestionar procesos en Python utilizando el módulo os.
+Creación de procesos con fork()
+
+El sistema UNIX/Linux permite a un proceso crear un nuevo proceso con fork().
+Cuando un proceso llama a fork():
+
+    Se duplica el proceso actual, creando un hijo.
+
+    Ambos procesos continúan ejecutándose desde el mismo punto.
+
+    El proceso padre recibe el PID del hijo, mientras que el hijo recibe 0.
+
+📌 Ejemplo de uso:
+
+import os
+
+pid = os.fork()  # Crea un nuevo proceso
+
+if pid > 0:
+    print(f"Proceso padre (PID: {os.getpid()}), hijo PID: {pid}")
+else:
+    print(f"Proceso hijo (PID: {os.getpid()}), padre PID: {os.getppid()}")
+
+🔹 Ejecuta esto en la terminal y observa la salida.
+Ejecutar otro programa con exec()
+
+Una vez que un proceso ha hecho fork(), puede reemplazar su código con un nuevo programa usando exec().
+
+📌 Ejemplo:
+Este código crea un proceso hijo que ejecuta ls -l usando execvp().
+
+import os
+
+pid = os.fork()
+
+if pid == 0:  # Código del hijo
+    os.execvp("ls", ["ls", "-l"])
+else:
+    os.wait()  # El padre espera a que el hijo termine
+    print("Proceso hijo finalizado.")
+
+🔹 Ejecuta esto y observa cómo el hijo ejecuta ls -l.
+Esperar la terminación de un proceso hijo (wait())
+
+Cuando un proceso padre crea un hijo, puede esperar a que termine con wait(), evitando que queden procesos "zombis".
+
+📌 Ejemplo:
+
+import os
+import time
+
+pid = os.fork()
+
+if pid == 0:  # Código del hijo
+    print(f"Hijo (PID {os.getpid()}) ejecutándose...")
+    time.sleep(2)
+    print(f"Hijo (PID {os.getpid()}) finaliza.")
+else:  # Código del padre
+    print(f"Padre (PID {os.getpid()}) esperando al hijo...")
+    os.wait()  # Espera a que el hijo termine
+    print("El proceso hijo ha terminado.")
+
+🔹 Ejecuta esto y observa el comportamiento.
+📌 Alto para puesta en común
+
+Ejecuta los ejemplos y verifica que comprendes cómo funcionan fork(), exec(), y wait().
+Preguntas de comprensión:
+
+    ¿Qué hace fork() en un programa Python?
+
+    ¿Cómo puede un proceso hijo ejecutar otro programa?
+
+    ¿Por qué es importante que el proceso padre use wait()?
+    1.Crea un nuevo proceso duplicando el actual. El proceso hijo recibe una copia del estado del padre y ejecuta el mismo código desde el punto del fork().
+    2.Puede usar exec() para reemplazar su código por el de otro programa, ejecutándolo en su propio espacio de proceso.
+    3.Para evitar procesos zombie y asegurarse de que el hijo termine correctamente, liberando sus recursos.
+4. Procesos zombis y huérfanos
+
+Ahora, vamos a entender dos tipos de procesos especiales en UNIX/Linux: procesos zombis y procesos huérfanos.
+Procesos Zombis
+
+Un proceso zombi es un proceso que ha terminado su ejecución, pero su entrada aún persiste en la tabla de procesos del sistema porque su proceso padre no ha leído su estado de salida usando wait().
+
+Este tipo de proceso no consume CPU, pero ocupa espacio en la tabla de procesos, lo cual puede ser un problema si se acumulan muchos procesos zombis.
+
+Ejemplo de proceso zombi:
+
+    El proceso hijo termina, pero el proceso padre no llama a wait() para recoger el estado del hijo.
+
+    El hijo permanece en la tabla de procesos como un proceso zombi hasta que el padre lo "recoja".
+
+📌 Simulación de un proceso zombi en Python:
+
+import os
+import time
+
+pid = os.fork()
+
+if pid == 0:  # Código del hijo
+    print(f"Hijo (PID {os.getpid()}) ejecutándose...")
+    time.sleep(2)
+    print(f"Hijo (PID {os.getpid()}) finaliza.")
+else:  # Código del padre (no usa wait())
+    print(f"Padre (PID {os.getpid()}) no espera al hijo.")
+    time.sleep(10)  # El padre no espera, dejando al hijo como zombi
+    print(f"Padre (PID {os.getpid()}) termina.")
+
+🔹 Ejecuta esto y usa ps aux | grep Z para buscar procesos zombis.
+El proceso hijo debería aparecer como un proceso zombi en la salida.
+Procesos Huérfanos
+
+Un proceso huérfano es un proceso cuyo proceso padre ha terminado, pero el proceso sigue ejecutándose. Estos procesos son adoptados por el proceso init o systemd (PID 1), que se encarga de gestionarlos.
+
+🔹 Simulación de un proceso huérfano:
+Si el proceso padre termina antes de que el hijo termine, el hijo se convierte en huérfano.
+
+📌 Ejemplo de proceso huérfano en Python:
+
+import os
+import time
+
+pid = os.fork()
+
+if pid == 0:  # Código del hijo
+    print(f"Hijo (PID {os.getpid()}) ejecutándose...")
+    time.sleep(5)
+    print(f"Hijo (PID {os.getpid()}) finaliza.")
+else:  # Código del padre
+    print(f"Padre (PID {os.getpid()}) termina rápidamente.")
+    time.sleep(1)  # El padre termina antes que el hijo
+
+🔹 Ejecuta esto y observa cómo el proceso hijo se convierte en huérfano, adoptado por init o systemd.
+Puedes usar ps -eF para verificar la adopción del proceso huérfano.
+📌 Alto para puesta en común
+
+Prueba estos ejemplos y asegúrate de comprender la diferencia entre un proceso zombi y huérfano.
+Preguntas de comprensión:
+
+    ¿Qué es un proceso zombi y cómo se genera?
+
+    ¿Cómo un proceso huérfano es gestionado en el sistema?
+
+    ¿Qué comando puedes usar para detectar procesos zombis?
+    1.Un proceso zombi es un proceso que ha terminado su ejecución, pero su entrada en la tabla de procesos aún no ha sido eliminada porque el proceso padre no ha leído su estado de salida con wait().
+    2.Un proceso huérfano es aquel cuyo proceso padre ha terminado antes que él. En ese caso, el proceso huérfano es adoptado por el proceso init o systemd, que se encarga de gestionar su finalización.
+    3.Puedes usar el comando ps aux | grep 'Z' para identificar procesos zombis, ya que los procesos zombis suelen aparecer con un estado 'Z' en la columna de estado.
+5. Ejercicios prácticos progresivos
+
+Ahora que hemos cubierto los conceptos fundamentales de procesos, zombis y huérfanos, vamos a hacer algunos ejercicios prácticos para consolidar lo aprendido. Comenzaremos con ejemplos sencillos y luego avanzaremos a aplicaciones más complejas.
+Ejercicio 1: Crear un proceso hijo con fork()
+
+El primer ejercicio consiste en crear un proceso hijo que imprima un mensaje y luego termine. Este es un paso básico para familiarizarse con el uso de fork().
+
+Instrucciones:
+
+    Crea un proceso hijo usando fork().
+
+    El proceso hijo debe imprimir su PID y el del padre.
+
+    El proceso padre debe esperar a que el hijo termine utilizando wait().
+
+📌 Código:
+
+import os
+
+pid = os.fork()
+
+if pid > 0:  # Proceso padre
+    print(f"Soy el padre (PID: {os.getpid()}), y mi hijo tiene PID: {pid}")
+    os.wait()  # Espera a que el hijo termine
+    print("El hijo ha terminado.")
+else:  # Proceso hijo
+    print(f"Soy el hijo (PID: {os.getpid()}) y mi padre tiene PID: {os.getppid()}")
+
+🔹 Ejecuta este código y observa cómo el padre espera al hijo.
+Ejercicio 2: Crear un servidor simple multiproceso
+
+En este ejercicio, vamos a crear un servidor simple que simula un servidor de echo utilizando múltiples procesos. El servidor espera conexiones y responde con el mismo mensaje que recibe.
+
+Instrucciones:
+
+    El servidor acepta múltiples conexiones (simuladas como procesos) usando fork().
+
+    Cada cliente (proceso hijo) recibe un mensaje y lo devuelve al "cliente" (proceso padre).
+
+    El proceso padre se encarga de aceptar nuevas conexiones y esperar a que cada uno de los hijos termine.
+
+📌 Código:
+
+import os
+import time
+
+def servidor():
+    pid = os.fork()
+    
+    if pid > 0:  # Proceso padre (servidor)
+        print(f"Servidor (PID: {os.getpid()}) esperando a clientes...")
+        os.wait()  # Espera a que el hijo termine
+        print("Cliente ha terminado.")
+    else:  # Proceso hijo (cliente)
+        print(f"Cliente (PID: {os.getpid()}) conecta al servidor...")
+        time.sleep(2)  # Simula tiempo de procesamiento
+        print(f"Cliente (PID: {os.getpid()}) responde al servidor.")
+        os._exit(0)  # Termina el proceso hijo
+
+servidor()
+
+🔹 Ejecuta este código y observa cómo el servidor maneja múltiples clientes (procesos) de manera secuencial.
+Ejercicio 3: Implementar un servidor multiproceso simple con fork() y exec()
+
+En este ejercicio, vamos a implementar un servidor que utilice fork() para crear un proceso hijo para cada cliente y utilice exec() para ejecutar un programa externo (como ls) en el proceso hijo.
+
+Instrucciones:
+
+    El servidor acepta conexiones de clientes.
+
+    Cada cliente se maneja con un nuevo proceso hijo creado con fork().
+
+    El proceso hijo usa exec() para ejecutar el comando ls -l y luego termina.
+
+📌 Código:
+
+import os
+
+def servidor():
+    pid = os.fork()
+    
+    if pid > 0:  # Proceso padre
+        print(f"Servidor (PID: {os.getpid()}) espera a cliente...")
+        os.wait()  # Espera a que el hijo termine
+        print("Cliente ha terminado.")
+    else:  # Proceso hijo
+        print(f"Cliente (PID: {os.getpid()}) ejecutando 'ls -l'...")
+        os.execvp("ls", ["ls", "-l"])  # Ejecuta 'ls -l' en el proceso hijo
+
+servidor()
+
+🔹 Ejecuta este código y observa cómo el proceso hijo ejecuta ls -l como si fuera un comando del sistema.
+📌 Alto para puesta en común
+
+Prueba estos ejercicios y asegúrate de entender cómo se manejan los procesos en Python utilizando fork(), wait(), y exec().
+Preguntas de comprensión:
+
+    ¿Qué hace el proceso padre en el primer ejercicio?
+
+    ¿Cómo se gestionan múltiples clientes en el segundo ejercicio?
+
+    ¿Cuál es la función de exec() en el tercer ejercicio?
+    1.El proceso padre generalmente crea un proceso hijo usando fork() y puede esperar que termine usando wait(), gestionando recursos o realizando tareas adicionales mientras el hijo ejecuta su código.
+    2.Los múltiples clientes pueden ser gestionados mediante la creación de un nuevo proceso o hilo para cada uno, lo que permite que el servidor maneje varias conexiones simultáneamente.
+    3.exec() reemplaza el proceso actual con otro programa. Se usa para ejecutar un programa diferente dentro de un proceso hijo, sin necesidad de crear un nuevo proceso con fork().
+¡Excelente! 🎯 Has comprendido perfectamente los conceptos y cómo se aplican en los ejercicios.
+
+Si todo ha quedado claro y has logrado ejecutar los ejemplos sin problemas, podemos dar por concluida esta sesión sobre procesos. Has aprendido lo siguiente:
+
+    Conceptos básicos de procesos, su creación y manejo con fork(), exec() y wait().
+
+    Manejo de procesos zombis y huérfanos, con ejemplos prácticos.
+
+    Implementación de ejemplos prácticos, como un servidor multiproceso básico.
+
+Resumen y siguientes pasos:
+
+    Has dominado la creación y manipulación básica de procesos en Python, lo cual es fundamental para comprender cómo funciona un sistema operativo a nivel de procesos.
+
+    El siguiente paso podría ser profundizar en otros conceptos de sistemas operativos, como la comunicación entre procesos (IPC), hilos, o procesos en segundo plano, pero eso se puede abordar en otro momento.
